@@ -41,9 +41,13 @@ const groups = [
   }
 ];
 
+import { useEngine } from "@/context/EngineContext";
+import { Power } from "lucide-react";
+
 export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
+  const { cogniflowActive, stopEngine } = useEngine();
 
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border bg-sidebar">
@@ -76,7 +80,7 @@ export function AppSidebar() {
                     <SidebarMenuButton asChild className="h-11 rounded-xl transition-all duration-200">
                       <NavLink
                         to={item.url}
-                        end={item.url === "/"}
+                        end={item.url === "/dashboard"}
                         className="flex items-center gap-3 px-3 py-2 rounded-xl text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-white/5 transition-all duration-200"
                         activeClassName="bg-primary text-white font-medium shadow-lg shadow-primary/20"
                       >
@@ -101,7 +105,17 @@ export function AppSidebar() {
         ))}
       </SidebarContent>
 
-      <SidebarFooter className="p-4 mt-auto">
+      <SidebarFooter className="p-4 mt-auto space-y-4">
+        {cogniflowActive && !collapsed && (
+          <button
+            onClick={stopEngine}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl bg-red-500/10 text-red-500 border border-red-500/20 hover:bg-red-500 hover:text-white transition-all duration-200 text-sm font-bold uppercase tracking-wider shadow-lg shadow-red-500/10 mb-2"
+          >
+            <Power className="w-4 h-4" />
+            Stop Engine
+          </button>
+        )}
+        
         {!collapsed && (
           <div className="bg-white/5 rounded-2xl p-3 flex items-center gap-3">
             <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center text-white font-bold">

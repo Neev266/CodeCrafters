@@ -1,4 +1,15 @@
+<<<<<<< HEAD
 from fastapi import APIRouter
+=======
+from fastapi import APIRouter, Request
+from datetime import datetime
+
+from app.schemas.user_behavior import UserBehavior
+from app.services.feature_engine import extract_features
+from app.models.cognitive_engine import predict_state
+from app.services.n8n_service import trigger_n8n
+from sys_monitor import monitor
+>>>>>>> a1c23d2 (removed venv and cleaned repo)
 
 router = APIRouter()
 def predict_state(features, emotion):

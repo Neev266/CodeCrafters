@@ -18,6 +18,8 @@ import RecoveryGames from "./pages/RecoveryGames";
 import WeeklyReport from "./pages/WeeklyReport";
 import DigitalTimeline from "./pages/DigitalTimeline";
 
+import { EngineProvider } from "./context/EngineContext";
+
 const queryClient = new QueryClient();
 
 const App = () => {
@@ -27,31 +29,33 @@ const App = () => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
+      <EngineProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
 
-        <Routes>
-          {/* 🔐 PUBLIC ROUTES */}
-          <Route path="/login" element={!user ? <Login /> : <Navigate to="/" />} />
-          <Route path="/signup" element={!user ? <Signup /> : <Navigate to="/" />} />
+          <Routes>
+            {/* 🔐 PUBLIC ROUTES */}
+            <Route path="/login" element={!user ? <Login /> : <Navigate to="/" />} />
+            <Route path="/signup" element={!user ? <Signup /> : <Navigate to="/" />} />
 
-          {/* 🔒 PROTECTED ROUTES */}
-          <Route path="/" element={user ? <Index /> : <Navigate to="/login" />} />
-          <Route path="/analytics" element={user ? <BehaviorAnalytics /> : <Navigate to="/login" />} />
-          <Route path="/detection" element={user ? <DetectionDetails /> : <Navigate to="/login" />} />
-          <Route path="/logs" element={user ? <AutomationLogs /> : <Navigate to="/login" />} />
-          <Route path="/emotions" element={user ? <EmotionAnalysis /> : <Navigate to="/login" />} />
-          <Route path="/settings" element={user ? <SettingsPage /> : <Navigate to="/login" />} />
-          <Route path="/games" element={user ? <RecoveryGames /> : <Navigate to="/login" />} />
-          <Route path="/report" element={user ? <WeeklyReport /> : <Navigate to="/login" />} />
-          <Route path="/timeline" element={user ? <DigitalTimeline /> : <Navigate to="/login" />} />
+            {/* 🔒 PROTECTED ROUTES */}
+            <Route path="/" element={user ? <Index /> : <Navigate to="/login" />} />
+            <Route path="/analytics" element={user ? <BehaviorAnalytics /> : <Navigate to="/login" />} />
+            <Route path="/detection" element={user ? <DetectionDetails /> : <Navigate to="/login" />} />
+            <Route path="/logs" element={user ? <AutomationLogs /> : <Navigate to="/login" />} />
+            <Route path="/emotions" element={user ? <EmotionAnalysis /> : <Navigate to="/login" />} />
+            <Route path="/settings" element={user ? <SettingsPage /> : <Navigate to="/login" />} />
+            <Route path="/games" element={user ? <RecoveryGames /> : <Navigate to="/login" />} />
+            <Route path="/report" element={user ? <WeeklyReport /> : <Navigate to="/login" />} />
+            <Route path="/timeline" element={user ? <DigitalTimeline /> : <Navigate to="/login" />} />
 
-          {/* 🔁 DEFAULT REDIRECT */}
-          <Route path="*" element={<Navigate to={user ? "/" : "/login"} />} />
-        </Routes>
+            {/* 🔁 DEFAULT REDIRECT */}
+            <Route path="*" element={<Navigate to={user ? "/" : "/login"} />} />
+          </Routes>
 
-      </TooltipProvider>
+        </TooltipProvider>
+      </EngineProvider>
     </QueryClientProvider>
   );
 };
