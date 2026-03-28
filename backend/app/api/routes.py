@@ -1,66 +1,73 @@
+
 from fastapi import APIRouter, Request
 from datetime import datetime
-
 from app.schemas.user_behavior import UserBehavior
 from app.services.feature_engine import extract_features
 from app.models.cognitive_engine import predict_state
 from app.services.n8n_service import trigger_n8n
 from sys_monitor import monitor
+from pydantic import BaseModel
+import requests
+
 
 router = APIRouter()
-def predict_state(features, emotion):
 
-    activity = (
-        features["typing_speed"] * 0.4 +
-        features["click_rate"] * 0.3 +
-        (1 - features["idle_ratio"]) * 0.3
-    )
+# 🔗 Replace with your actual n8n webhook URL
+N8N_WEBHOOK_URL = "https://your-n8n-url/webhook/xyz"
 
-    passive = (
-        (1 - features["typing_speed"]) * 0.3 +
-        (1 - features["click_rate"]) * 0.3 +
-        (1 - features["tab_switch_rate"]) * 0.4
-    )
 
-    focus = activity * 0.6 + passive * 0.4
+# ==============================
+# 📦 Pydantic Model (Input Schema)
+# ==============================
 
-    confusion = (
-        features["error_rate"] * 0.4 +
-        features["repeat_ratio"] * 0.3 +
-        (1 - features["typing_speed"]) * 0.3
-    )
+class CognitiveState(BaseModel):
+    user_id: int
+    state: str
+    confidence: float
+    session_confidence: float
+    emotion: str
+    timestamp: str
 
-    stress = (
-        features["error_rate"] * 0.4 +
-        features["click_rate"] * 0.3 +
-        features["repeat_ratio"] * 0.3
-    )
 
-    distraction = (
-        features["tab_switch_rate"] * 0.5 +
-        features["idle_ratio"] * 0.2 +
-        (1 - features["click_rate"]) * 0.3
-    )
+# ==============================
+# 🚀 /analyze → Send data to n8n
+# ==============================
 
-    idle = features["idle_ratio"]
+@router.post("/analyze")
+def analyze(data: CognitiveState):
+    print("📤 Received from client:", data.dict())
 
-    # Emotion boost
-    if emotion == "frustrated":
-        stress += 0.1
-        confusion += 0.05
+    try:
+        response = requests.post(
+            N8N_WEBHOOK_URL,
+            json=data.dict()
+        )
 
-    scores = {
-        "focused": round(focus, 3),
-        "confused": round(confusion, 3),
-        "stressed": round(stress, 3),
-        "distracted": round(distraction, 3),
-        "idle": round(idle, 3)
+        return {
+            "status": "sent_to_n8n",
+            "n8n_status_code": response.status_code,
+            "n8n_response": response.text
+        }
+
+    except Exception as e:
+        return {
+            "status": "error",
+            "message": str(e)
+        }
+
+
+# ==============================
+# 🔁 /n8n-response → Receive from n8n
+# ==============================
+
+@router.post("/n8n-response")
+def n8n_response(payload: dict):
+    print("📥 Received from n8n:", payload)
+
+    # 👇 Extract the string sent by n8n
+    message = payload.get("message", "No message received")
+
+    return {
+        "status": "received",
+        "reply": message
     }
-
-    state = max(scores, key=scores.get)
-    confidence = round(scores[state], 2)
-
-    sorted_vals = sorted(scores.values(), reverse=True)
-    session_confidence = round(sorted_vals[0] - sorted_vals[1], 2)
-
-    return state, confidence, scores, session_confidence
