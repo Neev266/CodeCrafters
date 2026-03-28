@@ -1,155 +1,146 @@
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { motion } from "framer-motion";
-import { emotionTimelineBlocks, emotionsInAction, moodCalendar } from "@/lib/mockData";
-import { Camera, Calendar } from "lucide-react";
+import { emotionTimelineBlocks, emotionsInAction, moodCalendar, emotionDistribution } from "@/lib/mockData";
+import EmotionCam from "@/components/EmotionCam";
 
 const EmotionAnalysis = () => {
-  const emotions = [
-    { label: 'Engaged', value: 72, color: 'bg-primary' },
-    { label: 'Frustrated', value: 12, color: 'bg-destructive' },
-    { label: 'Calm', value: 85, color: 'bg-success' },
-    { label: 'Stressed', value: 23, color: 'bg-warning' },
-    { label: 'Curious', value: 64, color: 'bg-accent' },
-  ];
-
   return (
     <DashboardLayout>
-      <div className="max-w-7xl mx-auto space-y-6">
-        <div>
-          <h1 className="text-2xl font-display font-bold text-foreground">Emotion Analysis</h1>
-          <p className="text-sm text-muted-foreground mt-1">Inferred emotional state from behavioral patterns</p>
+      <div className="flex flex-col gap-8 w-full max-w-7xl mx-auto px-4 py-8">
+        {/* Header Section */}
+        <div className="flex flex-col gap-1">
+          <h2 className="text-3xl font-black tracking-tight text-slate-800 uppercase">Emotion Analysis</h2>
+          <p className="text-sm font-medium text-slate-400">Real-time facial analysis and behavioral inference</p>
         </div>
 
-        {/* Emotion Timeline Strip */}
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="glass-card rounded-xl p-6">
-          <h3 className="text-sm font-display font-semibold text-foreground mb-1">Emotion Timeline</h3>
-          <p className="text-xs text-muted-foreground mb-4">Dominant emotional state per 30-minute block</p>
-          <div className="flex items-center gap-0.5 h-6 rounded-md overflow-hidden bg-muted/30">
-            {emotionTimelineBlocks.map((block, i) => (
-              <div 
-                key={i} 
-                className="flex-1 h-full hover:opacity-80 cursor-help"
-                style={{ backgroundColor: block.color }}
-                title={`${block.time} - ${block.label}`}
-              />
-            ))}
-          </div>
-          <div className="flex justify-between mt-2">
-            <span className="text-[10px] text-muted-foreground">{emotionTimelineBlocks[0]?.time}</span>
-            <span className="text-[10px] text-muted-foreground">{emotionTimelineBlocks[emotionTimelineBlocks.length - 1]?.time}</span>
-          </div>
-        </motion.div>
+        {/* Main Content */}
+        <div className="space-y-8">
+          
+          {/* Live Emotion Engine */}
+          <motion.div
+             initial={{ opacity: 0, y: 20 }}
+             animate={{ opacity: 1, y: 0 }}
+             className="w-full"
+          >
+            <EmotionCam />
+          </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {emotions.map((em, i) => (
-            <motion.div
-              key={em.label}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.08 }}
-              className="glass-card-hover rounded-xl p-6"
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Emotion Distribution */}
+            <motion.div 
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="p-8 pb-10 glass-card rounded-[2.5rem] border border-white/40 shadow-[0_8px_30px_rgb(0,0,0,0.04)] bg-white/50"
             >
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-sm font-medium text-foreground">{em.label}</span>
-                <span className="text-2xl font-display font-bold text-foreground">{em.value}%</span>
+              <div className="flex items-center justify-between mb-8">
+                <div>
+                  <h3 className="text-xl font-bold tracking-tight text-slate-800">EMOTION BREAKDOWN</h3>
+                  <p className="text-xs font-medium text-slate-400 mt-1 uppercase tracking-wider">Distribution today</p>
+                </div>
               </div>
-              <div className="h-2 bg-muted rounded-full overflow-hidden">
-                <motion.div
-                  initial={{ width: 0 }}
-                  animate={{ width: `${em.value}%` }}
-                  transition={{ delay: 0.3 + i * 0.1, duration: 0.8 }}
-                  className={`h-full rounded-full ${em.color}`}
-                />
+              
+              <div className="space-y-7">
+                {emotionDistribution.map((item) => (
+                  <div key={item.label} className="group">
+                    <div className="flex justify-between items-center mb-2.5">
+                      <div className="flex items-center gap-2.5">
+                        <span className="text-lg group-hover:scale-125 transition-transform duration-300">{item.emoji}</span>
+                        <span className="text-sm font-bold text-slate-600 tracking-tight">{item.label}</span>
+                      </div>
+                      <span className="text-sm font-black text-slate-800" style={{ color: item.color }}>{item.value}%</span>
+                    </div>
+                    <div className="h-2 w-full bg-slate-100/50 rounded-full overflow-hidden border border-slate-50">
+                      <motion.div 
+                        initial={{ width: 0 }}
+                        animate={{ width: `${item.value}%` }}
+                        transition={{ duration: 1, ease: "easeOut" }}
+                        className="h-full rounded-full shadow-[0_0_10px_rgba(0,0,0,0.05)]"
+                        style={{ backgroundColor: item.color }}
+                      />
+                    </div>
+                  </div>
+                ))}
               </div>
             </motion.div>
-          ))}
-        </div>
 
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="glass-card rounded-xl p-6">
-          <h3 className="text-sm font-display font-semibold text-foreground mb-1">How Emotions Are Detected</h3>
-          <p className="text-xs text-muted-foreground mb-4">Emotional states are inferred from combinations of behavioral signals — not from facial recognition or biometrics.</p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {[
-              { signal: 'Typing rhythm consistency', inference: 'Calm vs Stressed' },
-              { signal: 'Error correction patterns', inference: 'Frustrated vs Engaged' },
-              { signal: 'Navigation exploration', inference: 'Curious vs Routine' },
-              { signal: 'Response time variance', inference: 'Alert vs Fatigued' },
-            ].map((item) => (
-              <div key={item.signal} className="flex items-center justify-between py-2 border-b border-border/30 last:border-0">
-                <span className="text-xs text-muted-foreground">{item.signal}</span>
-                <span className="text-xs font-medium text-foreground">{item.inference}</span>
-              </div>
-            ))}
-          </div>
-        </motion.div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Emotions in action */}
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }} className="glass-card rounded-xl p-6">
-            <h3 className="text-sm font-display font-semibold text-foreground mb-1">Emotions in Action</h3>
-            <p className="text-xs text-muted-foreground mb-4">How detected emotions triggered system responses</p>
-            <div className="space-y-4">
-              {emotionsInAction.map(ea => (
-                <div key={ea.emotion} className="flex flex-col border-b border-border/30 last:border-0 pb-3 last:pb-0">
-                  <div className="flex items-center gap-2 mb-1.5">
-                    <span className="w-2 h-2 rounded-full" style={{ backgroundColor: ea.color }} />
-                    <span className="text-sm font-medium text-foreground">{ea.emotion} ({ea.percent}%)</span>
-                  </div>
-                  <ul className="pl-4 border-l border-border ml-1 mt-1 space-y-1">
-                    {ea.actions.map(act => (
-                      <li key={act} className="text-xs text-muted-foreground flex items-center gap-2">
-                        <span className="text-[10px] text-primary">▸</span> {act}
-                      </li>
-                    ))}
-                  </ul>
+            {/* Emotions in Action */}
+            <motion.div 
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="p-8 pb-10 glass-card rounded-[2.5rem] border border-white/40 shadow-[0_8px_30px_rgb(0,0,0,0.04)] bg-white/50"
+            >
+              <div className="flex items-center justify-between mb-8">
+                <div>
+                  <h3 className="text-xl font-bold tracking-tight text-slate-800">EMOTIONS IN ACTION</h3>
+                  <p className="text-xs font-medium text-slate-400 mt-1 uppercase tracking-wider">What each emotion triggered</p>
                 </div>
+              </div>
+
+              <div className="space-y-4">
+                {emotionsInAction.map((action, idx) => (
+                  <motion.div 
+                    key={idx}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: idx * 0.1 }}
+                    className="p-4 rounded-2xl border border-white/60 shadow-sm flex items-center justify-between group hover:shadow-md transition-all duration-300"
+                    style={{ backgroundColor: action.bgColor }}
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="text-xs font-black px-3 py-1.5 rounded-full bg-white/80 shadow-sm border border-white" style={{ color: action.color }}>
+                        {action.emotion} ({action.percent}%)
+                      </div>
+                      <p className="text-xs font-bold text-slate-600 tracking-tight">
+                        → <span className="opacity-80 group-hover:opacity-100 transition-opacity">{action.action}</span>
+                      </p>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+          </div>
+
+          {/* Mood Calendar */}
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="p-8 glass-card rounded-[2.5rem] border border-white/40 shadow-[0_8px_30px_rgb(0,0,0,0.04)] bg-white/50"
+          >
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h3 className="text-xl font-bold tracking-tight text-slate-800 uppercase">Mood Calendar — March 2025</h3>
+                <p className="text-xs font-medium text-slate-400 mt-1 uppercase tracking-wider">Daily dominant emotional state</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-7 gap-6 max-w-4xl mx-auto">
+              {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map(day => (
+                <div key={day} className="text-center text-[10px] font-black text-slate-300 uppercase tracking-widest mb-2">{day}</div>
+              ))}
+              {moodCalendar.map((cell, idx) => (
+                <motion.div 
+                  key={idx} 
+                  whileHover={{ scale: 1.1, rotate: [0, -2, 2, 0] }}
+                  className={`aspect-square rounded-2xl flex items-center justify-center relative shadow-sm border transition-all duration-300 ${!cell.hasData ? 'bg-slate-50/30 border-slate-100/50' : 'cursor-help border-white/20'}`}
+                  style={{ backgroundColor: cell.bgColor || undefined }}
+                  title={cell.hasData ? `Day ${cell.day}: ${cell.emotion}` : 'No data'}
+                >
+                  <span className={`text-[11px] font-black ${cell.hasData ? 'text-slate-600/70' : 'text-slate-200'}`}>{cell.day}</span>
+                </motion.div>
               ))}
             </div>
           </motion.div>
-
-          {/* Webcam Upcoming + Mood Calendar */}
-          <div className="flex flex-col gap-6">
-            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.7 }} className="border border-border/40 bg-muted/20 rounded-xl p-5 relative overflow-hidden">
-              <div className="absolute top-0 right-0 p-4 opacity-10">
-                <Camera className="w-16 h-16" />
-              </div>
-              <div className="flex items-center gap-2 mb-2">
-                <Camera className="w-4 h-4 text-muted-foreground" />
-                <h3 className="text-sm font-display font-semibold text-muted-foreground">Webcam Emotion Detection</h3>
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20 font-medium">Coming Soon</span>
-              </div>
-              <p className="text-xs text-muted-foreground mb-4 max-w-[80%]">Opt-in facial expression analysis for higher accuracy emotion detection using face-api.js. No data stored externally.</p>
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-4 bg-border/50 rounded-full cursor-not-allowed" />
-                <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Currently Disabled</span>
-              </div>
-            </motion.div>
-
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8 }} className="glass-card rounded-xl p-6">
-               <div className="flex items-center gap-2 mb-1">
-                 <Calendar className="w-4 h-4 text-primary" />
-                 <h3 className="text-sm font-display font-semibold text-foreground">Mood Calendar</h3>
-               </div>
-               <p className="text-xs text-muted-foreground mb-4">Your daily dominant emotional state</p>
-               
-               <div className="grid grid-cols-7 gap-1.5 mb-2">
-                 {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((d, i) => (
-                   <span key={i} className="text-[10px] font-medium text-muted-foreground text-center block">{d}</span>
-                 ))}
-               </div>
-               <div className="grid grid-cols-7 gap-1.5">
-                 {moodCalendar.map((cell, idx) => (
-                   <div 
-                     key={idx} 
-                     className={`aspect-square rounded-sm ${!cell.hasData ? 'bg-muted/30 border border-border/20' : 'cursor-help border border-black/10'}`}
-                     style={{ backgroundColor: cell.color || undefined }}
-                     title={cell.hasData ? `Day ${cell.day}: ${cell.emotion}` : 'No data'}
-                   />
-                 ))}
-               </div>
-            </motion.div>
-          </div>
         </div>
+
+        {/* Info Section */}
+        <motion.div 
+          initial={{ opacity: 0 }} 
+          animate={{ opacity: 1 }} 
+          transition={{ delay: 0.8 }} 
+          className="pt-4 border-t border-slate-100 flex items-center gap-2 opacity-50"
+        >
+          <p className="text-[10px] text-muted-foreground italic">Note: Inferred states are combined with real-time facial analysis for highest accuracy.</p>
+        </motion.div>
       </div>
     </DashboardLayout>
   );
