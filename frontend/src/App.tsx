@@ -1,40 +1,53 @@
-import { Routes, Route, Navigate } from "react-router-dom";
-import Login from "./pages/Login";
-import Signup from "./pages/Signup";
-import Dashboard from "./pages/Index";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { Route, Routes, Navigate } from "react-router-dom";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { Toaster } from "@/components/ui/toaster";
+import { TooltipProvider } from "@/components/ui/tooltip";
+
 import { useAuth } from "./hooks/useAuth";
 
-function ProtectedRoute({ children }: { children: JSX.Element }) {
-  const user = useAuth();
+import Index from "./pages/Index";
+import BehaviorAnalytics from "./pages/BehaviorAnalytics";
+import DetectionDetails from "./pages/DetectionDetails";
+import AutomationLogs from "./pages/AutomationLogs";
+import EmotionAnalysis from "./pages/EmotionAnalysis";
+import SettingsPage from "./pages/Settings";
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
 
-  if (user === undefined) return <div>Loading...</div>;
+const queryClient = new QueryClient();
 
-  return user ? children : <Navigate to="/login" />;
-}
-
-export default function App() {
+const App = () => {
   const user = useAuth();
 
   if (user === undefined) return <div>Loading...</div>;
 
   return (
-    <Routes>
-      {/* Public routes */}
-      <Route path="/login" element={!user ? <Login /> : <Navigate to="/" />} />
-      <Route path="/signup" element={!user ? <Signup /> : <Navigate to="/" />} />
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
 
-      {/* Protected route */}
-      <Route
-        path="/"
-        element={
-          <ProtectedRoute>
-            <Dashboard />
-          </ProtectedRoute>
-        }
-      />
+        <Routes>
+          {/* 🔐 PUBLIC ROUTES */}
+          <Route path="/login" element={!user ? <Login /> : <Navigate to="/" />} />
+          <Route path="/signup" element={!user ? <Signup /> : <Navigate to="/" />} />
 
-      {/* Catch all */}
-      <Route path="*" element={<Navigate to="/" />} />
-    </Routes>
+          {/* 🔒 PROTECTED ROUTES */}
+          <Route path="/" element={user ? <Index /> : <Navigate to="/login" />} />
+          <Route path="/analytics" element={user ? <BehaviorAnalytics /> : <Navigate to="/login" />} />
+          <Route path="/detection" element={user ? <DetectionDetails /> : <Navigate to="/login" />} />
+          <Route path="/logs" element={user ? <AutomationLogs /> : <Navigate to="/login" />} />
+          <Route path="/emotions" element={user ? <EmotionAnalysis /> : <Navigate to="/login" />} />
+          <Route path="/settings" element={user ? <SettingsPage /> : <Navigate to="/login" />} />
+
+          {/* 🔁 DEFAULT REDIRECT */}
+          <Route path="*" element={<Navigate to={user ? "/" : "/login"} />} />
+        </Routes>
+
+      </TooltipProvider>
+    </QueryClientProvider>
   );
-}
+};
+
+export default App;
