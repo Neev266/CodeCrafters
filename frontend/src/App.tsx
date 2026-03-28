@@ -1,36 +1,40 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { Toaster } from "@/components/ui/toaster";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import Index from "./pages/Index.tsx";
-import BehaviorAnalytics from "./pages/BehaviorAnalytics.tsx";
-import DetectionDetails from "./pages/DetectionDetails.tsx";
-import AutomationLogs from "./pages/AutomationLogs.tsx";
-import EmotionAnalysis from "./pages/EmotionAnalysis.tsx";
-import SettingsPage from "./pages/Settings.tsx";
-import NotFound from "./pages/NotFound.tsx";
+import { Routes, Route, Navigate } from "react-router-dom";
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
+import Dashboard from "./pages/Index";
+import { useAuth } from "./hooks/useAuth";
 
-const queryClient = new QueryClient();
+function ProtectedRoute({ children }: { children: JSX.Element }) {
+  const user = useAuth();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/analytics" element={<BehaviorAnalytics />} />
-          <Route path="/detection" element={<DetectionDetails />} />
-          <Route path="/logs" element={<AutomationLogs />} />
-          <Route path="/emotions" element={<EmotionAnalysis />} />
-          <Route path="/settings" element={<SettingsPage />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+  if (user === undefined) return <div>Loading...</div>;
 
-export default App;
+  return user ? children : <Navigate to="/login" />;
+}
+
+export default function App() {
+  const user = useAuth();
+
+  if (user === undefined) return <div>Loading...</div>;
+
+  return (
+    <Routes>
+      {/* Public routes */}
+      <Route path="/login" element={!user ? <Login /> : <Navigate to="/" />} />
+      <Route path="/signup" element={!user ? <Signup /> : <Navigate to="/" />} />
+
+      {/* Protected route */}
+      <Route
+        path="/"
+        element={
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Catch all */}
+      <Route path="*" element={<Navigate to="/" />} />
+    </Routes>
+  );
+}
