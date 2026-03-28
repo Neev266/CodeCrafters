@@ -1,23 +1,15 @@
-
-from fastapi import APIRouter, Request
-from datetime import datetime
-from app.schemas.user_behavior import UserBehavior
-from app.services.feature_engine import extract_features
-from app.models.cognitive_engine import predict_state
-from app.services.n8n_service import trigger_n8n
-from sys_monitor import monitor
+from fastapi import APIRouter
 from pydantic import BaseModel
 import requests
 
-
 router = APIRouter()
 
-# 🔗 Replace with your actual n8n webhook URL
-N8N_WEBHOOK_URL = "https://your-n8n-url/webhook/xyz"
+# 🔗 Production n8n webhook URL
+N8N_WEBHOOK_URL = "https://codecrafterai.app.n8n.cloud/webhook/cognitive-state"
 
 
 # ==============================
-# 📦 Pydantic Model (Input Schema)
+# 📦 Input Schema
 # ==============================
 
 class CognitiveState(BaseModel):
@@ -35,21 +27,58 @@ class CognitiveState(BaseModel):
 
 @router.post("/analyze")
 def analyze(data: CognitiveState):
-    print("📤 Received from client:", data.dict())
+    payload = data.dict()
+
+    print("\n==============================")
+    print("📤 RECEIVED FROM CLIENT:")
+    print(payload)
+    print("==============================\n")
 
     try:
+        print("🚀 Sending data to n8n...")
+        print("🔗 URL:", N8N_WEBHOOK_URL)
+
         response = requests.post(
             N8N_WEBHOOK_URL,
-            json=data.dict()
+            json=payload,
+            timeout=10
         )
 
+        print("\n✅ RESPONSE FROM n8n:")
+        print("Status Code:", response.status_code)
+        print("Raw Response:", response.text)
+
+        # 🔥 Convert response safely to JSON
+        try:
+            response_json = response.json()
+        except Exception:
+            response_json = {"raw": response.text}
+
+        print("Parsed Response:", response_json)
+        print("==============================\n")
+
         return {
-            "status": "sent_to_n8n",
+            "status": "success",
             "n8n_status_code": response.status_code,
-            "n8n_response": response.text
+            "n8n_response": response_json
+        }
+
+    except requests.exceptions.Timeout:
+        print("⏰ ERROR: Request to n8n timed out")
+        return {
+            "status": "error",
+            "message": "n8n request timed out"
+        }
+
+    except requests.exceptions.ConnectionError:
+        print("❌ ERROR: Could not connect to n8n")
+        return {
+            "status": "error",
+            "message": "failed to connect to n8n"
         }
 
     except Exception as e:
+        print("🔥 ERROR:", str(e))
         return {
             "status": "error",
             "message": str(e)
@@ -57,15 +86,19 @@ def analyze(data: CognitiveState):
 
 
 # ==============================
-# 🔁 /n8n-response → Receive from n8n
+# 🔁 /n8n-response → Optional (if n8n calls back)
 # ==============================
 
 @router.post("/n8n-response")
 def n8n_response(payload: dict):
-    print("📥 Received from n8n:", payload)
+    print("\n==============================")
+    print("📥 RECEIVED FROM n8n:")
+    print(payload)
+    print("==============================\n")
 
-    # 👇 Extract the string sent by n8n
     message = payload.get("message", "No message received")
+
+    print("💬 Extracted Message:", message)
 
     return {
         "status": "received",

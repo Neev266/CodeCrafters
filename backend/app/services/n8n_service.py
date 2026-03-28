@@ -1,6 +1,6 @@
 import requests
 
-N8N_WEBHOOK_URL = "https://your-n8n-url/webhook/cognitive"
+N8N_WEBHOOK_URL = "https://codecrafterai.app.n8n.cloud/webhook/cognitive-state"
 
 def trigger_n8n(payload):
     try:
