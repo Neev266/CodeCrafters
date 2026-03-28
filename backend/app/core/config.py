@@ -1,0 +1,1 @@
+N8N_WEBHOOK_URL = "https://codecrafterai.app.n8n.cloud/webhook-test/cognitive-state"  # change to your actual n8n URL
