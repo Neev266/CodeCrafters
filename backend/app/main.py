@@ -1,7 +1,6 @@
-# app/main.py
-
-from fastapi import FastAPI
+# app/main.pyfrom fastapi import FastAPI
 from app.api.routes import router
+from fastapi import FastAPI
 
 app = FastAPI(
     title="Cognitive State Detection API",
