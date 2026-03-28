@@ -1,5 +1,6 @@
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { detectionStates } from "@/lib/mockData";
+import { detectionStates, liveStateSignals } from "@/lib/mockData";
+import { ArrowRight, CheckCircle2 } from "lucide-react";
 import { motion } from "framer-motion";
 
 const DetectionDetails = () => {
@@ -10,6 +11,50 @@ const DetectionDetails = () => {
           <h1 className="text-2xl font-display font-bold text-foreground">Detection Details</h1>
           <p className="text-sm text-muted-foreground mt-1">How each cognitive state is identified and classified</p>
         </div>
+
+        {/* Live State Banner */}
+        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className={`glass-card rounded-xl p-4 border-l-4 border-${detectionStates.find(s => s.state.toLowerCase() === liveStateSignals.state)?.color}`}>
+          <div className="flex items-center gap-2 mb-2">
+            <h3 className="text-sm font-semibold text-foreground">Live Detection active</h3>
+            <span className={`text-xs px-2 py-0.5 rounded-full bg-cognitive-${liveStateSignals.state}/10 text-cognitive-${liveStateSignals.state} font-medium capitalize`}>
+              Currently in {liveStateSignals.state}
+            </span>
+          </div>
+          <div className="flex gap-4 flex-wrap">
+            {liveStateSignals.signals.map((sig, idx) => (
+              <div key={idx} className={`flex items-center gap-1.5 text-xs ${sig.firing ? 'text-primary' : 'text-muted-foreground'}`}>
+                {sig.firing ? <CheckCircle2 className="w-3.5 h-3.5" /> : <div className="w-3.5 h-3.5 rounded-full border border-current opacity-50" />}
+                {sig.label}
+              </div>
+            ))}
+          </div>
+        </motion.div>
+
+        {/* State Transition Diagram */}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="glass-card rounded-xl p-6">
+          <h3 className="text-sm font-display font-semibold text-foreground mb-4">State Transition Flow</h3>
+          <div className="flex flex-wrap items-center justify-center gap-4 py-4 md:gap-8">
+            <div className="flex flex-col items-center gap-2">
+              <span className="text-xs px-3 py-1.5 rounded-full bg-cognitive-idle/10 text-cognitive-idle border border-cognitive-idle/20 font-medium">Idle</span>
+            </div>
+            <ArrowRight className="w-4 h-4 text-muted-foreground" />
+            <div className="flex flex-col items-center gap-2">
+              <span className="text-xs px-3 py-1.5 rounded-full bg-cognitive-focus/10 text-cognitive-focus border border-cognitive-focus/20 font-medium shadow-glow-primary">Focus</span>
+            </div>
+            <ArrowRight className="w-4 h-4 text-muted-foreground" />
+            <div className="flex flex-col items-center gap-2">
+              <span className="text-xs px-3 py-1.5 rounded-full bg-cognitive-distracted/10 text-cognitive-distracted border border-cognitive-distracted/20 font-medium">Distracted</span>
+            </div>
+            <ArrowRight className="w-4 h-4 text-muted-foreground" />
+            <div className="flex flex-col items-center gap-2">
+              <span className="text-xs px-3 py-1.5 rounded-full bg-cognitive-confused/10 text-cognitive-confused border border-cognitive-confused/20 font-medium">Confused</span>
+            </div>
+            <ArrowRight className="w-4 h-4 text-muted-foreground" />
+            <div className="flex flex-col items-center gap-2">
+              <span className="text-xs px-3 py-1.5 rounded-full bg-cognitive-fatigued/10 text-cognitive-fatigued border border-cognitive-fatigued/20 font-medium">Fatigued</span>
+            </div>
+          </div>
+        </motion.div>
 
         <div className="space-y-6">
           {detectionStates.map((item, i) => (

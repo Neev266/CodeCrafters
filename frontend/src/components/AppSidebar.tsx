@@ -1,4 +1,4 @@
-import { Brain, BarChart3, Search, ScrollText, Heart, Settings, ChevronLeft } from "lucide-react";
+import { Brain, BarChart3, Search, ScrollText, Heart, Settings, ChevronLeft, Gamepad2, FileText, Clock } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import {
@@ -21,6 +21,9 @@ const navItems = [
   { title: "Automation Logs", url: "/logs", icon: ScrollText },
   { title: "Emotion Analysis", url: "/emotions", icon: Heart },
   { title: "Settings", url: "/settings", icon: Settings },
+  { title: "Recovery Games", url: "/games", icon: Gamepad2 },
+  { title: "Weekly Report", url: "/report", icon: FileText },
+  { title: "Digital Timeline", url: "/timeline", icon: Clock },
 ];
 
 export function AppSidebar() {

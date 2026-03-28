@@ -14,6 +14,9 @@ import EmotionAnalysis from "./pages/EmotionAnalysis";
 import SettingsPage from "./pages/Settings";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import RecoveryGames from "./pages/RecoveryGames";
+import WeeklyReport from "./pages/WeeklyReport";
+import DigitalTimeline from "./pages/DigitalTimeline";
 
 const queryClient = new QueryClient();
 
@@ -40,6 +43,9 @@ const App = () => {
           <Route path="/logs" element={user ? <AutomationLogs /> : <Navigate to="/login" />} />
           <Route path="/emotions" element={user ? <EmotionAnalysis /> : <Navigate to="/login" />} />
           <Route path="/settings" element={user ? <SettingsPage /> : <Navigate to="/login" />} />
+          <Route path="/games" element={user ? <RecoveryGames /> : <Navigate to="/login" />} />
+          <Route path="/report" element={user ? <WeeklyReport /> : <Navigate to="/login" />} />
+          <Route path="/timeline" element={user ? <DigitalTimeline /> : <Navigate to="/login" />} />
 
           {/* 🔁 DEFAULT REDIRECT */}
           <Route path="*" element={<Navigate to={user ? "/" : "/login"} />} />

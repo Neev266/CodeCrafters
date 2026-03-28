@@ -1,8 +1,10 @@
 import { motion } from "framer-motion";
-import { currentState, cognitiveStateConfig } from "@/lib/mockData";
+import { cognitiveStateConfig } from "@/lib/mockData";
+import { useCognitiveState } from "@/hooks/useCognitiveState";
 
 export function CognitiveStateHero() {
-  const config = cognitiveStateConfig[currentState.state];
+  const { liveState, isLoading, error } = useCognitiveState();
+  const config = cognitiveStateConfig[liveState.state] || cognitiveStateConfig.idle;
 
   return (
     <motion.div
@@ -19,13 +21,20 @@ export function CognitiveStateHero() {
             </div>
             <div>
               <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider mb-1">Current Cognitive State</p>
-              <h2 className={`text-2xl font-display font-bold text-${config.color}`}>{config.label}</h2>
-              <p className="text-sm text-muted-foreground mt-1 max-w-md">{currentState.explanation}</p>
+              <h2 className={`text-2xl font-display font-bold text-${config.color}`}>
+                {config.label}
+                {isLoading && <span className="ml-3 text-sm animate-pulse text-muted-foreground">Polling...</span>}
+              </h2>
+              {error ? (
+                <p className="text-sm text-destructive mt-1 max-w-md">{error}</p>
+              ) : (
+                <p className="text-sm text-muted-foreground mt-1 max-w-md">{liveState.explanation}</p>
+              )}
             </div>
           </div>
           <div className="text-right">
             <div className="flex items-baseline gap-1">
-              <span className="text-4xl font-display font-bold text-foreground">{currentState.confidence}</span>
+              <span className="text-4xl font-display font-bold text-foreground">{liveState.confidence}</span>
               <span className="text-lg text-muted-foreground">%</span>
             </div>
             <p className="text-xs text-muted-foreground">confidence</p>
