@@ -1,99 +1,56 @@
-from fastapi import APIRouter, Request
-from datetime import datetime
+def predict_state(features, emotion):
 
-from app.schemas.user_behavior import UserBehavior
-from app.services.feature_engine import extract_features
-from app.models.cognitive_engine import predict_state
-from app.services.n8n_service import trigger_n8n
-
-router = APIRouter()
-
-# =========================================================
-# 🔹 MAIN ANALYSIS ENDPOINT (Tracker → Backend → n8n)
-# =========================================================
-@router.post("/analyze")
-def analyze_user(data: UserBehavior):
-    
-    # 1. Feature extraction
-    features = extract_features(data)
-    
-    # 2. Prediction
-    state, confidence, scores, session_confidence = predict_state(
-        features, data.emotion
+    activity = (
+        features["typing_speed"] * 0.4 +
+        features["click_rate"] * 0.3 +
+        (1 - features["idle_ratio"]) * 0.3
     )
-    
-    # 3. FULL RESULT (for response / storage)
-    result = {
-        "user_id": data.user_id,
-        "state": state,
-        "confidence": confidence,
-        "session_confidence": session_confidence,
-        "emotion": data.emotion,
-        "features": features,
-        "scores": scores,
-        "timestamp": datetime.utcnow().isoformat()
-    }
-    
-    # 4. CLEAN PAYLOAD FOR n8n 🔥
-    n8n_payload = {
-        "user_id": data.user_id,
-        "state": state,
-        "confidence": confidence,
-        "session_confidence": session_confidence,
-        "emotion": data.emotion,
-        "timestamp": datetime.utcnow().isoformat()
-    }
-    
-    # 5. Send data to n8n
-    trigger_n8n(n8n_payload)
-    
-    return result
 
+    passive = (
+        (1 - features["typing_speed"]) * 0.3 +
+        (1 - features["click_rate"]) * 0.3 +
+        (1 - features["tab_switch_rate"]) * 0.4
+    )
 
-# =========================================================
-# 🔹 RECEIVE RESPONSE FROM n8n (n8n → Backend)
-# =========================================================
-@router.post("/n8n-response")
-async def receive_from_n8n(request: Request):
-    data = await request.json()
+    focus = activity * 0.6 + passive * 0.4
 
-    print("📩 Received from n8n:", data)
+    confusion = (
+        features["error_rate"] * 0.4 +
+        features["repeat_ratio"] * 0.3 +
+        (1 - features["typing_speed"]) * 0.3
+    )
 
-    # Extract fields safely
-    user_id = data.get("user_id")
-    action = data.get("action")
-    message = data.get("message")
-    recommendation = data.get("recommendation")
+    stress = (
+        features["error_rate"] * 0.4 +
+        features["click_rate"] * 0.3 +
+        features["repeat_ratio"] * 0.3
+    )
 
-    # 🔥 Example decision handling
-    if action == "alert":
-        print(f"⚠️ ALERT for user {user_id}: {message}")
+    distraction = (
+        features["tab_switch_rate"] * 0.5 +
+        features["idle_ratio"] * 0.2 +
+        (1 - features["click_rate"]) * 0.3
+    )
 
-    elif action == "log":
-        print(f"📝 LOG for user {user_id}: {message}")
+    idle = features["idle_ratio"]
 
-    elif action == "recommend":
-        print(f"💡 Recommendation for user {user_id}: {recommendation}")
+    # Emotion boost
+    if emotion == "frustrated":
+        stress += 0.1
+        confusion += 0.05
 
-    else:
-        print(f"ℹ️ Unknown action from n8n: {data}")
-
-    # 👉 Future: store in DB / trigger notifications
-
-    return {
-        "status": "received",
-        "user_id": user_id,
-        "action": action
+    scores = {
+        "focused": round(focus, 3),
+        "confused": round(confusion, 3),
+        "stressed": round(stress, 3),
+        "distracted": round(distraction, 3),
+        "idle": round(idle, 3)
     }
 
+    state = max(scores, key=scores.get)
+    confidence = round(scores[state], 2)
 
-# =========================================================
-# 🔹 HEALTH CHECK (Optional but useful)
-# =========================================================
-@router.get("/health")
-def health_check():
-    return {
-        "status": "ok",
-        "service": "cognitive-backend",
-        "timestamp": datetime.utcnow().isoformat()
-    }
+    sorted_vals = sorted(scores.values(), reverse=True)
+    session_confidence = round(sorted_vals[0] - sorted_vals[1], 2)
+
+    return state, confidence, scores, session_confidence

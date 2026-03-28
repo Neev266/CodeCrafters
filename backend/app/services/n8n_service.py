@@ -1,19 +1,14 @@
-# app/services/n8n_service.py
+import requests
 
-import requests   # 👈 THIS WAS MISSING
-from app.core.config import N8N_WEBHOOK_URL
+N8N_WEBHOOK_URL = "https://your-n8n-url/webhook/cognitive"
 
 def trigger_n8n(payload):
     try:
-        print("Sending to n8n:", payload)
+        print("\n📤 Sending to n8n:", payload)
 
         response = requests.post(N8N_WEBHOOK_URL, json=payload)
-
-        print("n8n response:", response.status_code)
-        print("n8n response body:", response.text)
-
-        return response.status_code
+        print(f"Payload:{payload}")
+        print("✅ n8n triggered:", response.status_code)
 
     except Exception as e:
-        print("Error sending to n8n:", e)
-        return None
+        print("❌ n8n error:", e)
