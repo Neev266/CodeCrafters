@@ -188,43 +188,58 @@ export const stressActiveSince = 32; // minutes
 
 // MOCK DATA — Emotion analysis
 export const emotionTimelineBlocks = [
-  { time: '9:00', emotion: 'calm', label: 'Calm', color: 'hsl(142, 71%, 45%)' },
-  { time: '9:30', emotion: 'engaged', label: 'Engaged', color: 'hsl(199, 89%, 48%)' },
-  { time: '10:00', emotion: 'engaged', label: 'Engaged', color: 'hsl(199, 89%, 48%)' },
-  { time: '10:30', emotion: 'curious', label: 'Curious', color: 'hsl(172, 66%, 50%)' },
-  { time: '11:00', emotion: 'stressed', label: 'Stressed', color: 'hsl(38, 92%, 50%)' },
-  { time: '11:30', emotion: 'frustrated', label: 'Frustrated', color: 'hsl(0, 72%, 51%)' },
-  { time: '12:00', emotion: 'calm', label: 'Calm', color: 'hsl(142, 71%, 45%)' },
-  { time: '12:30', emotion: 'calm', label: 'Calm', color: 'hsl(142, 71%, 45%)' },
-  { time: '13:00', emotion: 'engaged', label: 'Engaged', color: 'hsl(199, 89%, 48%)' },
-  { time: '13:30', emotion: 'curious', label: 'Curious', color: 'hsl(172, 66%, 50%)' },
-  { time: '14:00', emotion: 'engaged', label: 'Engaged', color: 'hsl(199, 89%, 48%)' },
-  { time: '14:30', emotion: 'stressed', label: 'Stressed', color: 'hsl(38, 92%, 50%)' },
-  { time: '15:00', emotion: 'calm', label: 'Calm', color: 'hsl(142, 71%, 45%)' },
-  { time: '15:30', emotion: 'engaged', label: 'Engaged', color: 'hsl(199, 89%, 48%)' },
+  { time: '9:00', emotion: 'calm', label: 'Calm', color: 'hsl(var(--em-calm))' },
+  { time: '9:30', emotion: 'engaged', label: 'Engaged', color: 'hsl(var(--em-engaged))' },
+  { time: '10:00', emotion: 'engaged', label: 'Engaged', color: 'hsl(var(--em-engaged))' },
+  { time: '10:30', emotion: 'curious', label: 'Curious', color: 'hsl(var(--em-curious))' },
+  { time: '11:00', emotion: 'stressed', label: 'Stressed', color: 'hsl(var(--em-stressed))' },
+  { time: '11:30', emotion: 'frustrated', label: 'Frustrated', color: 'hsl(var(--em-frustrated))' },
+  { time: '12:00', emotion: 'calm', label: 'Calm', color: 'hsl(var(--em-calm))' },
+  { time: '12:30', emotion: 'calm', label: 'Calm', color: 'hsl(var(--em-calm))' },
+  { time: '13:00', emotion: 'engaged', label: 'Engaged', color: 'hsl(var(--em-engaged))' },
+  { time: '13:30', emotion: 'curious', label: 'Curious', color: 'hsl(var(--em-curious))' },
+  { time: '14:00', emotion: 'engaged', label: 'Engaged', color: 'hsl(var(--em-engaged))' },
+  { time: '14:30', emotion: 'stressed', label: 'Stressed', color: 'hsl(var(--em-stressed))' },
+  { time: '15:00', emotion: 'calm', label: 'Calm', color: 'hsl(var(--em-calm))' },
+  { time: '15:30', emotion: 'engaged', label: 'Engaged', color: 'hsl(var(--em-engaged))' },
 ];
 
 export const emotionsInAction = [
-  { emotion: 'Stressed', percent: 23, color: 'hsl(38, 92%, 50%)', actions: ['Focus Mode activated 2×', 'Game suggested 3×'] },
-  { emotion: 'Curious', percent: 64, color: 'hsl(172, 66%, 50%)', actions: ['No action taken'] },
-  { emotion: 'Frustrated', percent: 12, color: 'hsl(0, 72%, 51%)', actions: ['Help overlay triggered 1×', 'Break suggested 1×'] },
-  { emotion: 'Engaged', percent: 72, color: 'hsl(199, 89%, 48%)', actions: ['Ambient sound activated 1×'] },
-  { emotion: 'Calm', percent: 85, color: 'hsl(142, 71%, 45%)', actions: ['No action taken'] },
+  { emotion: 'Stressed', percent: 23, color: 'hsl(var(--em-stressed))', bgColor: 'hsl(var(--em-stressed-bg))', actions: ['Focus Mode activated 2×', 'Game suggested 3×'], count: 2, action: 'Focus Mode activated 2×, Game suggested 3×' },
+  { emotion: 'Curious', percent: 64, color: 'hsl(var(--em-curious))', bgColor: 'hsl(var(--em-curious-bg))', actions: ['No action taken'], count: 0, action: 'No action taken' },
+  { emotion: 'Frustrated', percent: 12, color: 'hsl(var(--em-frustrated))', bgColor: 'hsl(var(--em-frustrated-bg))', actions: ['Help overlay triggered 1×', 'Break suggested 1×'], count: 2, action: 'Help overlay triggered 1×, Break suggested 1×' },
+  { emotion: 'Engaged', percent: 72, color: 'hsl(var(--em-engaged))', bgColor: 'hsl(var(--em-engaged-bg))', actions: ['Ambient sound activated 1×'], count: 1, action: 'Ambient sound activated 1×' },
+  { emotion: 'Calm', percent: 85, color: 'hsl(var(--em-calm))', bgColor: 'hsl(var(--em-calm-bg))', actions: ['No action taken'], count: 0, action: 'No action taken' },
+];
+
+export const emotionDistribution = [
+  { label: 'Calm', value: 38, color: 'hsl(var(--em-calm))', emoji: '😌' },
+  { label: 'Engaged', value: 30, color: 'hsl(var(--em-engaged))', emoji: '🔵' },
+  { label: 'Curious', value: 16, color: 'hsl(var(--em-curious))', emoji: '🔍' },
+  { label: 'Stressed', value: 10, color: 'hsl(var(--em-stressed))', emoji: '😰' },
+  { label: 'Frustrated', value: 6, color: 'hsl(var(--em-frustrated))', emoji: '😡' },
 ];
 
 export const moodCalendar = Array.from({ length: 35 }, (_, i) => {
   const day = i + 1;
   if (day > 28) return { day: day - 28, hasData: false, emotion: null, color: null };
   const emotions = [
-    { emotion: 'calm', color: 'hsl(142, 71%, 45%)' },
-    { emotion: 'engaged', color: 'hsl(199, 89%, 48%)' },
-    { emotion: 'stressed', color: 'hsl(38, 92%, 50%)' },
-    { emotion: 'curious', color: 'hsl(172, 66%, 50%)' },
-    { emotion: 'frustrated', color: 'hsl(0, 72%, 51%)' },
+    { emotion: 'calm', color: 'hsl(var(--em-calm))' },
+    { emotion: 'engaged', color: 'hsl(var(--em-engaged))' },
+    { emotion: 'stressed', color: 'hsl(var(--em-stressed))' },
+    { emotion: 'curious', color: 'hsl(var(--em-curious))' },
+    { emotion: 'frustrated', color: 'hsl(var(--em-frustrated))' },
   ];
-  const pick = emotions[Math.floor(Math.random() * emotions.length)];
-  return { day, hasData: day <= 28, emotion: pick.emotion, color: pick.color };
-});
+    const pick = emotions[Math.floor(Math.random() * emotions.length)];
+    const bgMap: Record<string, string> = {
+      calm: 'hsl(var(--em-calm-bg))',
+      engaged: 'hsl(var(--em-engaged-bg))',
+      stressed: 'hsl(var(--em-stressed-bg))',
+      curious: 'hsl(var(--em-curious-bg))',
+      frustrated: 'hsl(var(--em-frustrated-bg))',
+    };
+    return { day, hasData: day <= 28, emotion: pick.emotion, color: pick.color, bgColor: bgMap[pick.emotion] };
+  });
 
 export const recoveryGamesHistory = [
   { id: 1, datetime: '2024-01-15 10:45', game: 'Breathing Pacer', duration: '90s', stressBefore: 78, stressAfter: 52, outcome: 'Improved' as const },
