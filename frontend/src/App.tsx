@@ -17,6 +17,8 @@ import Signup from "./pages/Signup";
 import RecoveryGames from "./pages/RecoveryGames";
 import WeeklyReport from "./pages/WeeklyReport";
 import DigitalTimeline from "./pages/DigitalTimeline";
+import Teams from "./pages/Teams";
+import ChatBotPage from "./pages/ChatBotPage";
 
 import { EngineProvider } from "./context/EngineContext";
 
@@ -49,6 +51,8 @@ const App = () => {
             <Route path="/games" element={user ? <RecoveryGames /> : <Navigate to="/login" />} />
             <Route path="/report" element={user ? <WeeklyReport /> : <Navigate to="/login" />} />
             <Route path="/timeline" element={user ? <DigitalTimeline /> : <Navigate to="/login" />} />
+            <Route path="/teams" element={user ? <Teams /> : <Navigate to="/login" />} />
+            <Route path="/chatbot" element={user ? <ChatBotPage /> : <Navigate to="/login" />} />
 
             {/* 🔁 DEFAULT REDIRECT */}
             <Route path="*" element={<Navigate to={user ? "/" : "/login"} />} />

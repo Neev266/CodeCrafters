@@ -1,4 +1,4 @@
-import { Brain, BarChart3, Search, ScrollText, Heart, Settings, ChevronLeft, Gamepad2, FileText, Clock } from "lucide-react";
+import { Brain, BarChart3, Search, ScrollText, Heart, Settings, ChevronLeft, Gamepad2, FileText, Clock, Users, Bot } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import {
@@ -37,6 +37,13 @@ const groups = [
       { title: "Weekly Report", url: "/report", icon: FileText },
       { title: "Digital Timeline", url: "/timeline", icon: Clock },
       { title: "Settings", url: "/settings", icon: Settings },
+    ]
+  },
+  {
+    label: "COMMUNITY",
+    items: [
+      { title: "Teams", url: "/teams", icon: Users },
+      { title: "AI Companion", url: "/chatbot", icon: Bot },
     ]
   }
 ];
@@ -115,7 +122,7 @@ export function AppSidebar() {
             Stop Engine
           </button>
         )}
-        
+
         {!collapsed && (
           <div className="bg-white/5 rounded-2xl p-3 flex items-center gap-3">
             <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center text-white font-bold">
