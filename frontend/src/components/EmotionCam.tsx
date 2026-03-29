@@ -11,6 +11,15 @@ const EmotionCam = () => {
   const [error, setError] = useState<string | null>(null);
   const [isCapturing, setIsCapturing] = useState(true);
 
+  // 👁️ NEW: Eye Data State
+  const [eyeData, setEyeData] = useState({
+    eye_state: "unknown",
+    eye_open_score: 0,
+  });
+
+  // 🧠 NEW: Cognitive Response
+  const [cognitiveState, setCognitiveState] = useState<string>("loading");
+
   useEffect(() => {
     let interval: NodeJS.Timeout;
 
@@ -34,6 +43,19 @@ const EmotionCam = () => {
           setConfidence(result.confidence);
           setStress(result.stress || 0);
           setError(null);
+
+          // 👁️ NEW: Basic Eye Logic (simple approximation)
+          if (result.emotion === "sad" || result.emotion === "neutral") {
+            setEyeData({
+              eye_state: "fatigue",
+              eye_open_score: 0.008,
+            });
+          } else {
+            setEyeData({
+              eye_state: "focused",
+              eye_open_score: 0.02,
+            });
+          }
         } else if (data.error) {
           setError(data.error);
         } else {
@@ -48,6 +70,50 @@ const EmotionCam = () => {
     interval = setInterval(detectEmotion, 2000);
     return () => clearInterval(interval);
   }, [isCapturing]);
+
+  // 🚀 NEW: SEND TO /analyze (YOUR MAIN BACKEND)
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      try {
+        const payload = {
+          user_id: 1,
+
+          typing_speed: 1.2,
+          backspace_rate: 0.3,
+          click_rate: 1.5,
+          tab_switches: 2,
+          idle_time: 30,
+          repeated_actions: 5,
+
+          eye_state: eyeData.eye_state,
+          eye_open_score: eyeData.eye_open_score,
+
+          emotion: currentEmotion,
+          timestamp: new Date().toISOString(),
+        };
+
+        const res = await fetch("http://127.0.0.1:8000/analyze", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        });
+
+        const data = await res.json();
+
+        if (data?.state) {
+          setCognitiveState(data.state);
+        }
+
+        console.log("🔥 Cognitive:", data);
+      } catch (err) {
+        console.error("Analyze error:", err);
+      }
+    }, 2000);
+
+    return () => clearInterval(interval);
+  }, [eyeData, currentEmotion]);
 
   const emotionColors: Record<string, string> = {
     happy: "text-green-500 bg-green-50",
@@ -70,16 +136,16 @@ const EmotionCam = () => {
           <p className="text-xs font-medium text-slate-400 mt-1 uppercase tracking-wider">Real-time facial analysis</p>
         </div>
         <div className="flex items-center gap-3">
-           <button 
-             onClick={() => setIsCapturing(!isCapturing)}
-             className={`px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${isCapturing ? 'bg-red-50 text-red-500 border border-red-100' : 'bg-primary/10 text-primary border border-primary/20'}`}
-           >
-             {isCapturing ? 'Stop Feed' : 'Start Feed'}
-           </button>
-           <div className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-2 ${isCapturing ? 'bg-green-50 text-green-500' : 'bg-slate-100 text-slate-400'}`}>
-             <div className={`w-1.5 h-1.5 rounded-full ${isCapturing ? 'bg-green-500 animate-pulse' : 'bg-slate-300'}`} />
-             {isCapturing ? 'Live Recognition' : 'Paused'}
-           </div>
+          <button 
+            onClick={() => setIsCapturing(!isCapturing)}
+            className={`px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${isCapturing ? 'bg-red-50 text-red-500 border border-red-100' : 'bg-primary/10 text-primary border border-primary/20'}`}
+          >
+            {isCapturing ? 'Stop Feed' : 'Start Feed'}
+          </button>
+          <div className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-2 ${isCapturing ? 'bg-green-50 text-green-500' : 'bg-slate-100 text-slate-400'}`}>
+            <div className={`w-1.5 h-1.5 rounded-full ${isCapturing ? 'bg-green-500 animate-pulse' : 'bg-slate-300'}`} />
+            {isCapturing ? 'Live Recognition' : 'Paused'}
+          </div>
         </div>
       </div>
 
@@ -94,19 +160,25 @@ const EmotionCam = () => {
               className="w-full h-full object-cover"
               mirrored={true}
             />
+
+            {/* 🔥 NEW: Cognitive State Overlay */}
+            <div className="absolute top-4 right-4 bg-black/60 text-white px-3 py-1 rounded-lg text-xs font-bold">
+              {cognitiveState}
+            </div>
+
             {!isCapturing && (
               <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center">
                 <Camera className="w-12 h-12 text-white/50" />
               </div>
             )}
+
             {error && (
               <div className="absolute top-4 left-4 right-4 bg-red-500/90 text-white p-3 rounded-xl text-[10px] font-bold flex items-center gap-2 backdrop-blur-md border border-red-400">
                 <AlertTriangle className="w-3 h-3" />
                 {error}
               </div>
             )}
-            
-            {/* Real-time Indicator Overlay */}
+
             <div className="absolute bottom-4 left-4 flex gap-1">
               {[1, 2, 3, 4].map(i => (
                 <motion.div 
@@ -116,57 +188,35 @@ const EmotionCam = () => {
                   className="w-1 bg-white/60 rounded-full"
                 />
               ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Data Panel */}
-        <div className="p-8 bg-slate-50/30 flex flex-col gap-6 border-l border-white/40">
-          <div className="space-y-4">
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Detected State</p>
-            <div className={`p-6 rounded-[2rem] border-2 border-white shadow-sm flex flex-col items-center justify-center transition-all duration-500 ${emotionColors[currentEmotion?.toLowerCase()] || 'bg-white text-slate-400'}`}>
-              <span className="text-4xl mb-3">
-                {currentEmotion === 'angry' ? '😡' : currentEmotion === 'happy' ? '😊' : currentEmotion === 'sad' ? '😢' : currentEmotion === 'fear' ? '😨' : currentEmotion === 'surprise' ? '😲' : currentEmotion === 'disgust' ? '🤢' : '😐'}
-              </span>
-              <h4 className="text-2xl font-black uppercase tracking-tight capitalize">{currentEmotion}</h4>
-              <p className="text-[10px] font-bold opacity-60 mt-1 uppercase tracking-widest">Confidence: {confidence ? confidence.toFixed(1) + '%' : '--'}</p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="p-5 bg-white rounded-3xl border border-white shadow-sm">
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Stress Score</p>
-              <div className="flex items-end gap-2">
-                <span className="text-3xl font-black text-slate-800">{stress}</span>
-                <span className="text-[10px] font-bold text-slate-400 mb-1.5">PTS</span>
-              </div>
-              <div className="mt-3 h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
-                <motion.div 
-                  animate={{ width: `${stress}%` }}
-                  className={`h-full rounded-full ${stress > 70 ? 'bg-red-400' : stress > 40 ? 'bg-yellow-400' : 'bg-green-400'}`}
-                />
+                    </div>
+                  </div>
+                </div>
+        
+                {/* Stats Panel */}
+                <div className="p-8 flex flex-col justify-between border-l border-white/40">
+                  <div className="space-y-6">
+                    <div>
+                      <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Current Emotion</p>
+                      <div className={`text-3xl font-black ${emotionColors[currentEmotion] || emotionColors.neutral} px-4 py-3 rounded-2xl inline-block`}>
+                        {currentEmotion.toUpperCase()}
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Confidence</p>
+                      <p className="text-2xl font-black text-slate-700">{confidence ? `${(confidence * 100).toFixed(1)}%` : 'N/A'}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Stress Level</p>
+                      <div className="w-full bg-slate-200 rounded-full h-2">
+                        <div className="bg-red-500 h-2 rounded-full" style={{ width: `${Math.min(stress * 100, 100)}%` }} />
+                      </div>
+                      <p className="text-sm font-bold text-slate-600 mt-2">{(stress * 100).toFixed(1)}%</p>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
-
-            <div className="p-5 bg-white rounded-3xl border border-white shadow-sm">
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">System Load</p>
-              <div className="flex items-end gap-2">
-                <span className="text-3xl font-black text-slate-800">LOW</span>
-                <Activity className="w-5 h-5 text-primary mb-1.5 opacity-40" />
-              </div>
-              <p className="text-[9px] font-bold text-green-500 mt-2">Optimal 0.4s lag</p>
-            </div>
-          </div>
-
-          <div className="mt-auto p-4 bg-primary/5 rounded-2xl border border-primary/10">
-            <p className="text-[10px] font-bold text-primary/70 leading-relaxed italic">
-              "System is correlating facial cues with behavioral patterns for highest accuracy. No raw biometric data is logged."
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-export default EmotionCam;
+          );
+        };
+        
+        export default EmotionCam;

@@ -2,6 +2,10 @@ from fastapi import APIRouter
 from pydantic import BaseModel
 import requests
 
+# 🧠 IMPORT YOUR ENGINES
+from app.services.feature_engine import extract_features
+from app.models.cognitive_engine import evaluate_state
+
 router = APIRouter()
 
 # 🔗 Production n8n webhook URL
@@ -9,31 +13,79 @@ N8N_WEBHOOK_URL = "https://codecrafterai.app.n8n.cloud/webhook/cognitive-state"
 
 
 # ==============================
-# 📦 Input Schema
+# 📦 Input Schema (UPDATED 🔥)
 # ==============================
 
 class CognitiveState(BaseModel):
     user_id: int
-    state: str
-    confidence: float
-    session_confidence: float
-    emotion: str
+
+    # 🧠 Behavioral data
+    typing_speed: float
+    backspace_rate: float
+    click_rate: float
+    tab_switches: int
+    idle_time: float
+    repeated_actions: int
+
+    # 👁️ Iris data (from frontend)
+    eye_state: str = "unknown"
+    eye_open_score: float = 0.0
+
+    # ❤️ Emotion (optional)
+    emotion: str = "neutral"
+
+    # ⏱️ Meta
     timestamp: str
 
 
 # ==============================
-# 🚀 /analyze → Send data to n8n
+# 🚀 /analyze → FULL PIPELINE
 # ==============================
 
 @router.post("/analyze")
 def analyze(data: CognitiveState):
-    payload = data.dict()
 
     print("\n==============================")
     print("📤 RECEIVED FROM CLIENT:")
-    print(payload)
+    print(data.dict())
     print("==============================\n")
 
+    # ==============================
+    # 🧠 STEP 1: FEATURE EXTRACTION
+    # ==============================
+    features = extract_features(data)
+
+    print("🧠 EXTRACTED FEATURES:")
+    print(features)
+
+    # ==============================
+    # 🧠 STEP 2: COGNITIVE STATE
+    # ==============================
+    state, confidence = evaluate_state(features)
+
+    print("\n🎯 FINAL STATE:", state)
+    print("📊 CONFIDENCE:", confidence)
+
+    # ==============================
+    # 📦 STEP 3: PREPARE PAYLOAD
+    # ==============================
+    payload = {
+        "user_id": data.user_id,
+        "state": state,
+        "confidence": confidence,
+        "session_confidence": confidence,  # (can upgrade later)
+        "emotion": data.emotion,
+        "timestamp": data.timestamp,
+        "eye_state": features.get("eye_state"),
+        "eye_score": features.get("eye_open_score")
+    }
+
+    print("\n📤 FINAL PAYLOAD TO n8n:")
+    print(payload)
+
+    # ==============================
+    # 🚀 STEP 4: SEND TO n8n
+    # ==============================
     try:
         print("🚀 Sending data to n8n...")
         print("🔗 URL:", N8N_WEBHOOK_URL)
@@ -48,7 +100,6 @@ def analyze(data: CognitiveState):
         print("Status Code:", response.status_code)
         print("Raw Response:", response.text)
 
-        # 🔥 Convert response safely to JSON
         try:
             response_json = response.json()
         except Exception:
@@ -59,6 +110,9 @@ def analyze(data: CognitiveState):
 
         return {
             "status": "success",
+            "state": state,
+            "confidence": confidence,
+            "features": features,
             "n8n_status_code": response.status_code,
             "n8n_response": response_json
         }
@@ -86,7 +140,7 @@ def analyze(data: CognitiveState):
 
 
 # ==============================
-# 🔁 /n8n-response → Optional (if n8n calls back)
+# 🔁 /n8n-response
 # ==============================
 
 @router.post("/n8n-response")

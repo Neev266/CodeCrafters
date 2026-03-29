@@ -52,5 +52,28 @@ def predict_state(features, emotion):
 
     sorted_vals = sorted(scores.values(), reverse=True)
     session_confidence = round(sorted_vals[0] - sorted_vals[1], 2)
+    
+def evaluate_state(features):
+    score = 0
 
+    # 🧠 Behavior scoring
+    score += features["typing_speed"] * 0.2
+    score += (1 - features["idle_ratio"]) * 0.2
+    score += (1 - features["error_rate"]) * 0.1
+    score += (1 - features["repeat_ratio"]) * 0.1
+
+    # 👁️ Iris scoring (NEW 🔥)
+    if features["eye_state"] == "focused":
+        score += 0.4
+    elif features["eye_state"] == "fatigue":
+        score -= 0.3
+
+    # 🎯 FINAL CLASSIFICATION
+    if score > 0.7:
+        return "focused", score
+    elif score > 0.4:
+        return "distracted", score
+    else:
+        return "fatigued", score
+    
     return state, confidence, scores, session_confidence
